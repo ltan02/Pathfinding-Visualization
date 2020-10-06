@@ -31,6 +31,7 @@ tan = (230, 220, 170)
 coffee_brown = (200, 190, 140)
 moon_glow = (235, 245, 255)
 
+
 class Node(object):
     def __init__(self, pos, color, cellSizeX, cellSizeY, gridX, gridY, win, gridSizeX, gridSizeY):
         self.pos = pos  # tuple (x, y))
@@ -40,7 +41,7 @@ class Node(object):
         self.h = 0
         self.previous = None
 
-        #Constants
+        # Constants
         self.CELLSIZEX = cellSizeX
         self.CELLSIZEY = cellSizeY
         self.GRIDX = gridX
@@ -48,7 +49,6 @@ class Node(object):
         self.WIN = win
         self.GRIDSIZEX = gridSizeX
         self.GRIDSIZEY = gridSizeY
-
 
     def makeStart(self):
         self.color = green

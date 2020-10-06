@@ -3,6 +3,7 @@ from pygame.locals import *
 import sys
 from Node import Node
 from astar import astar
+from Button import Button
 
 ##########################
 # Color codes
@@ -41,7 +42,6 @@ moon_glow = (235, 245, 255)
 
 pygame.init()
 pygame.font.init()
-FONT = pygame.font.SysFont("Comic Sans MS", 15, True)
 CLOCK = pygame.time.Clock()
 SCREENWIDTH, SCREENHEIGHT = 1650, 1000
 WIN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
@@ -55,134 +55,93 @@ GRIDSIZEY = 20
 CELLSIZEX = GRIDWIDTH / GRIDSIZEX
 CELLSIZEY = GRIDHEIGHT / GRIDSIZEY
 
+
 ##########################
 # Helper Functions
 ##########################
 
 def drawGrid():
-    for x in range(GRIDSIZEX+1):
+    for x in range(GRIDSIZEX + 1):
         pygame.draw.line(WIN, black, (GRIDX + (CELLSIZEX * x), GRIDY), (GRIDX + (CELLSIZEX * x), GRIDY + GRIDHEIGHT))
 
-    for y in range(GRIDSIZEY+1):
+    for y in range(GRIDSIZEY + 1):
         pygame.draw.line(WIN, black, (GRIDX, GRIDY + (CELLSIZEY * y)), (GRIDX + GRIDWIDTH, GRIDY + (CELLSIZEY * y)))
+
+
+def drawKey(x, y, size, color, font, text, border=0):
+    pygame.draw.rect(WIN, color, (x, y, size, size), border)
+    textSurface = font.render(text, True, (0, 0, 0))
+    WIN.blit(textSurface, (x + size + 10, y + (size / 2) - 5))
+    return size + 10 + textSurface.get_width()
 
 
 def drawBackground():
     WIN.fill(white)
     pygame.draw.rect(WIN, black, (GRIDX, GRIDY, GRIDWIDTH, GRIDHEIGHT), 1)
 
+    font = pygame.font.SysFont("Arial", 20)
+    square_size = 40
+
+    yPos = GRIDHEIGHT + GRIDY + 20
+    xPos = GRIDX + 20
+
     # Start node
-    pygame.draw.rect(WIN, green, (40, 765, 25, 25))
-    textSurface = FONT.render("Start Node", False, (0, 0, 0))
-    WIN.blit(textSurface, (75, 765))
+    keyWidth = drawKey(xPos, yPos, square_size, green, font, "Start Node")
+    keyWidth += 30
 
     # End Node
-    pygame.draw.rect(WIN, orange, (175, 765, 25, 25))
-    textSurface = FONT.render("End Node", False, (0, 0, 0))
-    WIN.blit(textSurface, (210, 765))
+    keyWidth += drawKey(xPos + keyWidth, yPos, square_size, orange, font, "End Node")
+    keyWidth += 30
 
     # Barrier Node
-    pygame.draw.rect(WIN, black, (300, 765, 25, 25))
-    textSurface = FONT.render("Barrier Node", False, (0, 0, 0))
-    WIN.blit(textSurface, (335, 765))
+    keyWidth += drawKey(xPos + keyWidth, yPos, square_size, (0, 0, 0), font, "Barrier Node")
+    keyWidth += 30
 
     # Unvisited Node
-    pygame.draw.rect(WIN, black, (445, 765, 25, 25), 1)
-    textSurface = FONT.render("Unvisited Node", False, (0, 0, 0))
-    WIN.blit(textSurface, (480, 765))
+    keyWidth += drawKey(xPos + keyWidth, yPos, square_size, black, font, "Unvisited Node", 1)
+    keyWidth += 30
 
     # Visited Nodes
-    pygame.draw.rect(WIN, red, (600, 765, 25, 25))
-    pygame.draw.rect(WIN, yellow, (630, 765, 25, 25))
-    textSurface = FONT.render("Visited Nodes", False, (0, 0, 0))
-    WIN.blit(textSurface, (665, 765))
+    keyWidth += drawKey(xPos + keyWidth, yPos, square_size, red, font, "Closed Node")
+    keyWidth += 30
+
+    keyWidth += drawKey(xPos + keyWidth, yPos, square_size, yellow, font, "Open Node")
+    keyWidth += 30
 
     # Shortest-path Node
-    pygame.draw.rect(WIN, purple, (780, 765, 25, 25))
-    textSurface = FONT.render("Shortest-path Node", False, (0, 0, 0))
-    WIN.blit(textSurface, (815, 765))
+    keyWidth += drawKey(xPos + keyWidth, yPos, square_size, purple, font, "Shortest-path Node")
+
+def generateButtons():
+    buttons = []
+    buttons.append(Button(100, 10, 270, 80, light_gray, "Choose Pathfinder", 40, (0, 0, 0), "Arial", WIN))
+    buttons.append(Button(390, 10, 100, 35, light_gray, "Run", 25, (0, 0, 0), "Arial", WIN))
+    buttons.append(Button(390, 55, 100, 35, light_gray, "Stop", 25, (0, 0, 0), "Arial", WIN))
+    buttons.append(Button(1000, 10, 270, 80, light_gray, "Choose Maze Generator", 30, (0, 0, 0), "Arial", WIN))
+    buttons.append(Button(1290, 10, 100, 35, light_gray, "Run", 25, (0, 0, 0), "Arial", WIN))
+    buttons.append(Button(1290, 55, 100, 35, light_gray, "Stop", 25, (0, 0, 0), "Arial", WIN))
+    return buttons
 
 
-def drawPathfindingAlgorithmButton():
-    pygame.draw.rect(WIN, light_gray, (100, 10, 270, 80))
-    font = pygame.font.SysFont("Arial", 40, False)
-    textSurface = font.render("Choose Pathfinder", False, (0, 0, 0))
-    WIN.blit(textSurface, (107, 38))
+def redrawGameWindow():
+    drawBackground()
 
+    for row in range(len(nodes)):
+        for col in nodes[row]:
+            col.draw()
 
-def pathfindingAlgorithmButtonPressed(posx, posy):
-    return 100 <= posx <= 370 and 10 <= posy <= 90
+    drawGrid()
 
+    for button in buttons:
+        button.draw()
 
-def runPathfindingButton():
-    pass
+    # Choose maze generation algorithm
+    # Run maze generation button
+    # Stop maze generation button
 
+    # Select Grid Size (rows and cols)
+    # Select speed of algorithm  (frame rate)
 
-def runPathfindingButtonPressed():
-    pass
-
-
-def stopPathfindingButton():
-    pass
-
-
-def stopPathfindingButtonPressed():
-    pass
-
-
-def drawMazeGenerationButton():
-    pass
-
-
-def mazeGenerationButtonPressed():
-    pass
-
-
-def runMazeGenerationButton():
-    pass
-
-
-def runMazeGenerationButtonPressed():
-    pass
-
-
-def stopMazeGenerationButton():
-    pass
-
-
-def stopMazeGenerationButtonPressed():
-    pass
-
-
-def redrawGameWindow(mode):
-    WIN.fill(white)
-    if mode == "main":
-        for row in range(len(nodes)):
-            for col in nodes[row]:
-                col.draw()
-
-        drawGrid()
-
-        drawPathfindingAlgorithmButton()
-        runPathfindingButton()
-        stopPathfindingButton()
-        # Choose pathfinding algorithm
-        # Run pathfinding button
-        # Stop pathfinding button
-
-        drawMazeGenerationButton()
-        runMazeGenerationButton()
-        stopMazeGenerationButton()
-        # Choose maze generation algorithm
-        # Run maze generation button
-        # Stop maze generation button
-
-        # Select Grid Size (rows and cols)
-        # Select speed of algorithm  (frame rate)
-
-        # Draw the information about the different colors
-    elif mode == "choosePathfinder":
-        pass
+    # Draw the information about the different colors
 
     pygame.display.update()
 
@@ -197,28 +156,12 @@ def createNodes():
     return nodes
 
 ##########################
-# Choose Pathfinding Algorithm Function
-##########################
-
-def choosePathfinder():
-    run = True
-    while run:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                run = False
-                pygame.quit()
-                sys.exit()
-
-        redrawGameWindow("choosePathfinder")
-
-
-
-##########################
 # Main Function
 ##########################
 
+
 def main():
-    global nodes
+    global nodes, buttons
     pygame.display.set_caption("Pathfining Algorithm Visualizer")
     nodes = createNodes()
     start = False
@@ -228,13 +171,12 @@ def main():
     do_astar = False
     openSet = []
     closedSet = []
-    main_screen = True
-    while main_screen:
+    buttons = generateButtons()
+    while True:
         CLOCK.tick(60)
 
         for event in pygame.event.get():  # checking for events
             if event.type == QUIT:
-                main_screen = False
                 pygame.quit()
                 sys.exit()
             if pygame.mouse.get_pressed()[0]:
@@ -243,19 +185,20 @@ def main():
                 row = int((pos[1] - GRIDY) // CELLSIZEY)
                 if 0 <= row < GRIDSIZEY and 0 <= col < GRIDSIZEX:
                     currNode = nodes[row][col]
-                    if not (start) and not(currNode.isEnd()):
+                    if not (start) and not (currNode.isEnd()):
                         currNode.makeStart()
                         startNode = currNode
                         start = True
-                    elif not (end) and not(currNode.isStart()):
+                    elif not (end) and not (currNode.isStart()):
                         currNode.makeEnd()
                         endNode = currNode
                         end = True
-                    elif not(currNode.isEnd()) and not(currNode.isStart()):
+                    elif not (currNode.isEnd()) and not (currNode.isStart()):
                         nodes[row][col].makeBarrier()
 
-                if pathfindingAlgorithmButtonPressed(pos[0], pos[1]):
-                    choosePathfinder()
+                for button in buttons:
+                    if button.text == "Choose Pathfinder" and button.isPressed(pos[0], pos[1]):
+                        button.pressed = True
 
         keys = pygame.key.get_pressed()  # to check key pressed (or held down)
         if keys[pygame.K_BACKSPACE]:
@@ -280,7 +223,7 @@ def main():
                 print("No solution found")
                 do_astar = False
 
-        redrawGameWindow("main")
+        redrawGameWindow()
 
 
 main()
