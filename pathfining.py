@@ -113,12 +113,12 @@ def drawBackground():
 
 def generateButtons():
     buttons = []
-    buttons.append(Button(100, 10, 270, 80, light_gray, "Choose Pathfinder", 40, (0, 0, 0), "Arial", WIN))
-    buttons.append(Button(390, 10, 100, 35, light_gray, "Run", 25, (0, 0, 0), "Arial", WIN))
-    buttons.append(Button(390, 55, 100, 35, light_gray, "Stop", 25, (0, 0, 0), "Arial", WIN))
-    buttons.append(Button(1000, 10, 270, 80, light_gray, "Choose Maze Generator", 30, (0, 0, 0), "Arial", WIN))
-    buttons.append(Button(1290, 10, 100, 35, light_gray, "Run", 25, (0, 0, 0), "Arial", WIN))
-    buttons.append(Button(1290, 55, 100, 35, light_gray, "Stop", 25, (0, 0, 0), "Arial", WIN))
+    buttons.append(Button(100, 10, 270, 80, "Choose Pathfinder", 40, WIN))
+    buttons.append(Button(400, 10, 270, 80, "Choose Maze Generator", 30, WIN))
+    buttons.append(Button(1170, 10, 100, 35, "Reset", 25, WIN))
+    buttons.append(Button(1290, 10, 100, 35, "Run", 25, WIN))
+    buttons.append(Button(1290, 55, 100, 35, "Stop", 25, WIN))
+    buttons.append(Button(1170, 55, 100, 35, "Resume", 25, WIN, False))
     return buttons
 
 
@@ -172,6 +172,8 @@ def main():
     openSet = []
     closedSet = []
     buttons = generateButtons()
+    midrun = False
+    pathfinderRunning = ""
     while True:
         CLOCK.tick(60)
 
@@ -197,31 +199,59 @@ def main():
                         nodes[row][col].makeBarrier()
 
                 for button in buttons:
-                    if button.text == "Choose Pathfinder" and button.isPressed(pos[0], pos[1]):
+                    if button.isPressed(pos[0], pos[1]):
                         button.pressed = True
+                        if button.text == "Run" and button.pressed:
+                            if start and end:
+                                do_astar = True
+                                openSet.append(startNode)
+                            else:
+                                button.pressed = False
+                        if button.text == "Reset":
+                            nodes = createNodes()
+                            start = False
+                            end = False
+                            startNode = None
+                            endNode = None
+                            openSet = []
+                            closedSet = []
+                            button.pressed = False
+                            midrun = False
+                            pathfinderRunning = ""
+                            buttons[5].show = False
+                            for button in buttons:
+                                button.pressed = False
+                        if button.text == "Stop":
+                            if buttons[3].pressed:
+                                buttons[5].show = True
+                                if do_astar:
+                                    do_astar = False
+                                    button.pressed = False
+                                    pathfinderRunning = "astar"
+                            else:
+                                button.pressed = False
+                        if button.text == "Resume":
+                            if midrun and pathfinderRunning == "astar":
+                                do_astar = True
+                                button.show = False
+                                button.pressed = False
 
-        keys = pygame.key.get_pressed()  # to check key pressed (or held down)
-        if keys[pygame.K_BACKSPACE]:
-            nodes = createNodes()
-            start = False
-            end = False
-            startNode = None
-            endNode = None
-            openSet = []
-            closedSet = []
-        if keys[pygame.K_SPACE] or do_astar:
-            if do_astar == False:
-                openSet.append(startNode)
+        if do_astar:
             if len(openSet) > 0:
                 loop = astar(startNode, endNode, nodes, openSet, closedSet)
                 if loop != True:
                     openSet, closedSet = loop
                     do_astar = True
+                    midrun = True
                 else:
                     do_astar = False
+                    midrun = False
+                    buttons[3].pressed = False
             else:
                 print("No solution found")
                 do_astar = False
+                midrun = False
+                buttons[3].pressed = False
 
         redrawGameWindow()
 
