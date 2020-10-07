@@ -36,10 +36,16 @@ class Node(object):
     def __init__(self, pos, color, cellSizeX, cellSizeY, gridX, gridY, win, gridSizeX, gridSizeY):
         self.pos = pos  # tuple (x, y))
         self.color = color
+
+        #A*
         self.f = 0
         self.g = 0
         self.h = 0
         self.previous = None
+
+        #Dijkstra's
+        self.distance = float("inf")
+        self.parent = None
 
         # Constants
         self.CELLSIZEX = cellSizeX
@@ -49,6 +55,9 @@ class Node(object):
         self.WIN = win
         self.GRIDSIZEX = gridSizeX
         self.GRIDSIZEY = gridSizeY
+
+    def makeEmpty(self):
+        self.color = white
 
     def makeStart(self):
         self.color = green

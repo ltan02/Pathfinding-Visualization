@@ -4,6 +4,7 @@ import sys
 from Node import Node
 from astar import astar
 from Button import Button
+from Dijkstra import *
 
 ##########################
 # Color codes
@@ -125,6 +126,7 @@ def generateButtons():
 def generateDropDownPathfinder():
     dropDown = []
     dropDown.append(Button("A* Algorithm Button", 100, 90, 270, 80, "A* Algorithm", 40, WIN, False))
+    dropDown.append(Button("Dijkstra's Algorithm Button", 100, 170, 270, 80, "Dijkstra's Algorithm", 40, WIN, False))
     return dropDown
 
 
@@ -208,17 +210,23 @@ def redrawGameWindow(dropDownButtons=[]):
 def main():
     global nodes, buttons
     pygame.display.set_caption("Pathfining Algorithm Visualizer")
+
     nodes = createNodes()
     start = False
     end = False
     startNode = None
     endNode = None
+
     do_astar = False
     openSet = []
     closedSet = []
+
+    do_dijkstra = False
+    unexplored = []
+
     buttons = generateButtons()
+
     midrun = False
-    pathfinderRunning = ""
     pathfinderDropDown = generateDropDownPathfinder()
     mazeDropDown = generateDropDownMaze()
     while True:
@@ -234,16 +242,17 @@ def main():
                 row = int((pos[1] - GRIDY) // CELLSIZEY)
                 if 0 <= row < GRIDSIZEY and 0 <= col < GRIDSIZEX:
                     currNode = nodes[row][col]
-                    if not (start) and not (currNode.isEnd()):
+                    if not(start) and not(currNode.isEnd()):
                         currNode.makeStart()
+                        currNode.distance = 0
                         startNode = currNode
                         start = True
-                    elif not (end) and not (currNode.isStart()):
+                    elif not(end) and not(currNode.isStart()):
                         currNode.makeEnd()
                         endNode = currNode
                         end = True
-                    elif not (currNode.isEnd()) and not (currNode.isStart()):
-                        nodes[row][col].makeBarrier()
+                    elif not(currNode.isEnd()) and not(currNode.isStart()):
+                        currNode.makeBarrier()
 
                 for button in buttons:
                     if button.isPressed(pos[0], pos[1]):
@@ -253,6 +262,9 @@ def main():
                                 if buttons[0].text == "A* Algorithm":
                                     do_astar = True
                                     openSet.append(startNode)
+                                elif buttons[0].text == "Dijkstra's Algorithm":
+                                    do_dijkstra = True
+                                    unexplored = [nodes[row][col] for row in range(len(nodes)) for col in range(len(nodes[row]))]
                                 else:
                                     button.pressed = False
                             else:
@@ -301,6 +313,23 @@ def main():
                             else:
                                 button.pressed = False
 
+            if pygame.mouse.get_pressed()[2]:
+                pos2 = pygame.mouse.get_pos()
+                col2 = int((pos2[0] - GRIDX) // CELLSIZEX)
+                row2 = int((pos2[1] - GRIDY) // CELLSIZEY)
+                if 0 <= row2 < GRIDSIZEY and 0 <= col2 < GRIDSIZEX:
+                    node = nodes[row2][col2]
+                    if node.isBarrier() and not(node.isEnd()) and not(node.isStart()):
+                        node.makeEmpty()
+                    elif node.isStart() and not(node.isEnd()) and not(node.isBarrier()):
+                        node.makeEmpty()
+                        node.distance = float("inf")
+                        startNode = None
+                        start = False
+                    elif node.isEnd() and not(node.isStart()) and not(node.isBarrier()):
+                        node.makeEmpty()
+                        endNode = None
+                        end = False
 
         if do_astar:
             if len(openSet) > 0:
@@ -318,6 +347,17 @@ def main():
                 do_astar = False
                 midrun = False
                 buttons[3].pressed = False
+        elif do_dijkstra:
+            if len(unexplored) > 0:
+                loop = dijkstra(endNode, nodes, unexplored)
+                if loop != True:
+                    unexplored = loop
+                    do_dijkstra = True
+                    midrun = True
+                else:
+                    do_dijkstra = False
+                    midrun = False
+                    buttons[3].pressed = False
 
         redrawGameWindow()
 
