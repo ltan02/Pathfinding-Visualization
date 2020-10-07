@@ -58,4 +58,3 @@ def astar(start, end, nodes, openSet, closedSet):
                 tempNode.previous = current
 
     return openSet, closedSet
-

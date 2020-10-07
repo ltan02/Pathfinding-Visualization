@@ -9,7 +9,6 @@ def dijkstra(end, nodes, unexplored):
         if unexplored[i].distance < unexplored[winner].distance:
             winner = i
 
-    print(winner)
     currentNode = unexplored.pop(winner)
     if not(currentNode.isStart()) and not(currentNode.isEnd()):
         currentNode.makeOpen()
@@ -40,10 +39,3 @@ def dijkstra(end, nodes, unexplored):
                 tempNode.parent = currentNode
 
     return unexplored
-
-
-
-
-
-
-
