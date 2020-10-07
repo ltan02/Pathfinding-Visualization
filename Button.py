@@ -3,7 +3,8 @@ import pygame
 pygame.font.init()
 
 class Button(object):
-    def __init__(self, x, y, width, height, text, textSize, win, show=True):
+    def __init__(self, buttonName, x, y, width, height, text, textSize, win, show=True):
+        self.name = buttonName
         self.x = x
         self.y = y
         self.width = width

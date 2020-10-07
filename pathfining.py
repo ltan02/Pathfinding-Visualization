@@ -113,16 +113,69 @@ def drawBackground():
 
 def generateButtons():
     buttons = []
-    buttons.append(Button(100, 10, 270, 80, "Choose Pathfinder", 40, WIN))
-    buttons.append(Button(400, 10, 270, 80, "Choose Maze Generator", 30, WIN))
-    buttons.append(Button(1170, 10, 100, 35, "Reset", 25, WIN))
-    buttons.append(Button(1290, 10, 100, 35, "Run", 25, WIN))
-    buttons.append(Button(1290, 55, 100, 35, "Stop", 25, WIN))
-    buttons.append(Button(1170, 55, 100, 35, "Resume", 25, WIN, False))
+    buttons.append(Button("Choose Pathfinder Button", 100, 10, 270, 80, "Choose Pathfinder", 40, WIN))
+    buttons.append(Button("Choose Maze Generator Button", 400, 10, 270, 80, "Choose Maze Generator", 30, WIN))
+    buttons.append(Button("Reset Button", 1170, 10, 100, 35, "Reset", 25, WIN))
+    buttons.append(Button("Run Button", 1290, 10, 100, 35, "Run", 25, WIN))
+    buttons.append(Button("Stop Button", 1290, 55, 100, 35, "Stop", 25, WIN))
+    buttons.append(Button("Resume Button", 1170, 55, 100, 35, "Resume", 25, WIN, False))
     return buttons
 
 
-def redrawGameWindow():
+def generateDropDownPathfinder():
+    dropDown = []
+    dropDown.append(Button("A* Algorithm Button", 100, 90, 270, 80, "A* Algorithm", 40, WIN, False))
+    return dropDown
+
+
+def generateDropDownMaze():
+    dropDown = []
+    return dropDown
+
+
+def createNodes():
+    nodes = []
+    for row in range(GRIDSIZEY):
+        temp = []
+        for col in range(GRIDSIZEX):
+            temp.append(Node((col, row), white, CELLSIZEX, CELLSIZEY, GRIDX, GRIDY, WIN, GRIDSIZEX, GRIDSIZEY))
+        nodes.append(temp)
+    return nodes
+
+
+def dropDownMode(dropDownButtons):
+    if len(dropDownButtons) > 0:
+        run = True
+        while run:
+            for dropDown in dropDownButtons:
+                dropDown.show = True
+
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    run = False
+                    pygame.quit()
+                    sys.exit()
+
+                if pygame.mouse.get_pressed()[0]:
+                    pos = pygame.mouse.get_pos()
+
+                    if buttons[0].isPressed(pos[0], pos[1]):
+                        buttons[0].pressed = False
+                        run = False
+                        continue
+
+                    for button in dropDownButtons:
+                        if button.isPressed(pos[0], pos[1]):
+                            buttons[0].text = button.text
+                            run = False
+
+            redrawGameWindow(dropDownButtons)
+
+        for dropDownButton in dropDownButtons:
+            dropDownButton.show = False
+
+
+def redrawGameWindow(dropDownButtons=[]):
     drawBackground()
 
     for row in range(len(nodes)):
@@ -133,6 +186,9 @@ def redrawGameWindow():
 
     for button in buttons:
         button.draw()
+
+    for dropDown in dropDownButtons:
+        dropDown.draw()
 
     # Choose maze generation algorithm
     # Run maze generation button
@@ -145,20 +201,9 @@ def redrawGameWindow():
 
     pygame.display.update()
 
-
-def createNodes():
-    nodes = []
-    for row in range(GRIDSIZEY):
-        temp = []
-        for col in range(GRIDSIZEX):
-            temp.append(Node((col, row), white, CELLSIZEX, CELLSIZEY, GRIDX, GRIDY, WIN, GRIDSIZEX, GRIDSIZEY))
-        nodes.append(temp)
-    return nodes
-
 ##########################
 # Main Function
 ##########################
-
 
 def main():
     global nodes, buttons
@@ -174,6 +219,8 @@ def main():
     buttons = generateButtons()
     midrun = False
     pathfinderRunning = ""
+    pathfinderDropDown = generateDropDownPathfinder()
+    mazeDropDown = generateDropDownMaze()
     while True:
         CLOCK.tick(60)
 
@@ -201,13 +248,16 @@ def main():
                 for button in buttons:
                     if button.isPressed(pos[0], pos[1]):
                         button.pressed = True
-                        if button.text == "Run" and button.pressed:
+                        if button.name == "Run Button" and button.pressed:
                             if start and end:
-                                do_astar = True
-                                openSet.append(startNode)
+                                if buttons[0].text == "A* Algorithm":
+                                    do_astar = True
+                                    openSet.append(startNode)
+                                else:
+                                    button.pressed = False
                             else:
                                 button.pressed = False
-                        if button.text == "Reset":
+                        if button.name == "Reset Button":
                             nodes = createNodes()
                             start = False
                             end = False
@@ -219,9 +269,11 @@ def main():
                             midrun = False
                             pathfinderRunning = ""
                             buttons[5].show = False
+                            buttons[0].text = "Choose Pathfinder"
+                            buttons[1].text = "Choose Maze Generator"
                             for button in buttons:
                                 button.pressed = False
-                        if button.text == "Stop":
+                        if button.name == "Stop Button":
                             if buttons[3].pressed:
                                 buttons[5].show = True
                                 if do_astar:
@@ -230,11 +282,25 @@ def main():
                                     pathfinderRunning = "astar"
                             else:
                                 button.pressed = False
-                        if button.text == "Resume":
+                        if button.name == "Resume Button":
                             if midrun and pathfinderRunning == "astar":
                                 do_astar = True
                                 button.show = False
                                 button.pressed = False
+                        if button.name == "Choose Pathfinder Button":
+                            if not(midrun):
+                                button.text = "Choose Pathfinder"
+                                dropDownMode(pathfinderDropDown)
+                                buttons[0].pressed = False
+                            else:
+                                button.pressed = False
+                        if button.name == "Choose Maze Generator Button":
+                            if not(midrun):
+                                dropDownMode(mazeDropDown)
+                                buttons[1].pressed = False
+                            else:
+                                button.pressed = False
+
 
         if do_astar:
             if len(openSet) > 0:
