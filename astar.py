@@ -26,7 +26,7 @@ def astar(start, end, nodes, openSet, closedSet):
         while temp.previous is not None:
             path.append(temp.previous)
             temp = temp.previous
-        reconstructPath(path[1:len(path)-1])
+        reconstructPath(path[1:-1])
         return True
 
     closedSet.append(current)
