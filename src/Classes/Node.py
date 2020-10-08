@@ -45,7 +45,12 @@ class Node(object):
 
         #Dijkstra's
         self.distance = float("inf")
+
+        #Dijkstra and BFS
         self.parent = None
+
+        #BFS
+        self.discovered = False
 
         # Constants
         self.CELLSIZEX = cellSizeX

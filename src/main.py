@@ -6,11 +6,13 @@ import sys
 # Importing files to main
 ##########################
 
-from Classes.Node import *
-from Classes.Button import *
+from Classes.Node import Node
+from Classes.Button import Button
 from MazeGen.RecursiveMaze import *
-from Pathfinder.astar import *
-from Pathfinder.astar import *
+from Pathfinder.Dijkstra import dijkstra
+from Pathfinder.astar import astar
+from Pathfinder.BFS import bfs
+
 
 ##########################
 # Color codes
@@ -132,7 +134,8 @@ def generateButtons():
 def generateDropDownPathfinder():
     dropDown = []
     dropDown.append(Button("A* Algorithm Button", 100, 90, 270, 80, "A* Algorithm", 40, WIN, False))
-    dropDown.append(Button("Dijkstra's Algorithm Button", 100, 170, 270, 80, "Dijkstra's Algorithm", 40, WIN, False))
+    dropDown.append(Button("Dijkstra's Algorithm Button", 100, 170, 270, 80, "Dijkstra's Algorithm", 38, WIN, False))
+    dropDown.append(Button("Breadth-First Search Button", 100, 250, 270, 80, "Breadth-First Search", 35, WIN, False))
     return dropDown
 
 
@@ -175,6 +178,7 @@ def dropDownMode(dropDownButtons):
                     for button in dropDownButtons:
                         if button.isPressed(pos[0], pos[1]):
                             buttons[0].text = button.text
+                            buttons[0].textSize = button.textSize
                             run = False
 
             redrawGameWindow(dropDownButtons)
@@ -230,6 +234,9 @@ def main():
     do_dijkstra = False
     unexplored = []
 
+    do_bfs = False
+    queue = []
+
     buttons = generateButtons()
 
     midrun = False
@@ -271,6 +278,10 @@ def main():
                                 elif buttons[0].text == "Dijkstra's Algorithm":
                                     do_dijkstra = True
                                     unexplored = [nodes[row][col] for row in range(len(nodes)) for col in range(len(nodes[row]))]
+                                elif buttons[0].text == "Breadth-First Search":
+                                    do_bfs = True
+                                    startNode.discovered = True
+                                    queue.append(startNode)
                                 else:
                                     button.pressed = False
                             else:
@@ -281,14 +292,28 @@ def main():
                             end = False
                             startNode = None
                             endNode = None
+
+                            button.pressed = False
+
+                            midrun = False
+
+                            do_astar = False
                             openSet = []
                             closedSet = []
-                            button.pressed = False
-                            midrun = False
+
+                            do_dijkstra = False
+
+                            do_bfs = False
+                            queue = []
+
                             pathfinderRunning = ""
+
                             buttons[5].show = False
                             buttons[0].text = "Choose Pathfinder"
+                            buttons[0].textSize = 40
                             buttons[1].text = "Choose Maze Generator"
+                            buttons[1].textSize = 40
+
                             for button in buttons:
                                 button.pressed = False
                         if button.name == "Stop Button":
@@ -364,6 +389,27 @@ def main():
                     do_dijkstra = False
                     midrun = False
                     buttons[3].pressed = False
+            else:
+                print("No solution found")
+                do_dijkstra = False
+                midrun = False
+                buttons[3].pressed = False
+        elif do_bfs:
+            if len(queue) > 0:
+                loop = bfs(endNode, nodes, queue)
+                if loop != True:
+                    queue = loop
+                    do_bfs = True
+                    midrun = True
+                else:
+                    do_bfs = False
+                    midrun = False
+                    buttons[3].pressed = False
+            else:
+                print("No solution found")
+                do_bfs = False
+                midrun = False
+                buttons[3].pressed = False
 
         redrawGameWindow()
 
