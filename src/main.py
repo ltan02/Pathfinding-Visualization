@@ -1,10 +1,16 @@
 import pygame
 from pygame.locals import *
 import sys
-from Node import Node
-from astar import astar
-from Button import Button
-from Dijkstra import *
+
+##########################
+# Importing files to main
+##########################
+
+from Classes.Node import *
+from Classes.Button import *
+from MazeGen.RecursiveMaze import *
+from Pathfinder.astar import *
+from Pathfinder.astar import *
 
 ##########################
 # Color codes
