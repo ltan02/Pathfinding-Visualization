@@ -15,7 +15,7 @@ def bfs(end, nodes, queue):
     if v == end:
         path = []
         temp = v
-        path.append(v)
+        path.append(temp)
         while temp.parent is not None:
             path.append(temp.parent)
             temp = temp.parent

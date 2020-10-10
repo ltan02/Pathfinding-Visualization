@@ -52,6 +52,9 @@ class Node(object):
         #BFS
         self.discovered = False
 
+        #DFS
+        self.visited = False
+
         # Constants
         self.CELLSIZEX = cellSizeX
         self.CELLSIZEY = cellSizeY
@@ -107,6 +110,9 @@ class Node(object):
             if 0 <= tempX < self.GRIDSIZEX and 0 <= tempY < self.GRIDSIZEY:
                 neighbours.append((tempX, tempY))
         return neighbours
+
+    def heuristic(self, other):
+        return abs(self.pos[0] - other.pos[0]) + abs(self.pos[1] - other.pos[1])
 
     def __eq__(self, other):
         return self.pos == other.pos

@@ -12,7 +12,8 @@ from MazeGen.RecursiveMaze import *
 from Pathfinder.Dijkstra import dijkstra
 from Pathfinder.astar import astar
 from Pathfinder.BFS import bfs
-
+from Pathfinder.DFS import dfs
+from Pathfinder.Greedy import greedy
 
 ##########################
 # Color codes
@@ -136,6 +137,8 @@ def generateDropDownPathfinder():
     dropDown.append(Button("A* Algorithm Button", 100, 90, 270, 80, "A* Algorithm", 40, WIN, False))
     dropDown.append(Button("Dijkstra's Algorithm Button", 100, 170, 270, 80, "Dijkstra's Algorithm", 38, WIN, False))
     dropDown.append(Button("Breadth-First Search Button", 100, 250, 270, 80, "Breadth-First Search", 35, WIN, False))
+    dropDown.append(Button("Depth-First Search BUtton", 100, 330, 270, 80, "Depth-First Search", 38, WIN, False))
+    dropDown.append(Button("Greedy Algorithm Button", 100, 410, 270, 80, "Greedy Algorithm", 38, WIN, False))
     return dropDown
 
 
@@ -237,6 +240,12 @@ def main():
     do_bfs = False
     queue = []
 
+    do_dfs = False
+    stack = []
+
+    do_greedy = False
+    nodesToVisit = []
+
     buttons = generateButtons()
 
     midrun = False
@@ -282,6 +291,14 @@ def main():
                                     do_bfs = True
                                     startNode.discovered = True
                                     queue.append(startNode)
+                                elif buttons[0].text == "Depth-First Search":
+                                    do_dfs = True
+                                    startNode.visited = True
+                                    stack.append(startNode)
+                                elif buttons[0].text == "Greedy Algorithm":
+                                    do_greedy = True
+                                    startNode.distance = startNode.heuristic(endNode)
+                                    nodesToVisit.append(startNode)
                                 else:
                                     button.pressed = False
                             else:
@@ -312,7 +329,7 @@ def main():
                             buttons[0].text = "Choose Pathfinder"
                             buttons[0].textSize = 40
                             buttons[1].text = "Choose Maze Generator"
-                            buttons[1].textSize = 40
+                            buttons[1].textSize = 30
 
                             for button in buttons:
                                 button.pressed = False
@@ -408,6 +425,38 @@ def main():
             else:
                 print("No solution found")
                 do_bfs = False
+                midrun = False
+                buttons[3].pressed = False
+        elif do_dfs:
+            if len(stack) > 0:
+                loop = dfs(endNode, nodes, stack)
+                if loop != True:
+                    stack = loop
+                    do_dfs = True
+                    midrun = True
+                else:
+                    do_dfs = False
+                    midrun = False
+                    buttons[3].pressed = False
+            else:
+                print("No solution found")
+                do_dfs = False
+                midrun = False
+                buttons[3].pressed = False
+        elif do_greedy:
+            if len(nodesToVisit) > 0:
+                loop = greedy(endNode, nodes, nodesToVisit)
+                if loop != True:
+                    nodesToVisit = loop
+                    do_greedy = True
+                    midrun = True
+                else:
+                    do_greedy = False
+                    midrun = False
+                    buttons[3].pressed = False
+            else:
+                print("No solution found")
+                do_greedy = False
                 midrun = False
                 buttons[3].pressed = False
 

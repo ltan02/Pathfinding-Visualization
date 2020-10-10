@@ -1,9 +1,3 @@
-def heuristic(a, b):
-    (x1, y1) = a
-    (x2, y2) = b
-    return abs(x1 - x2) + abs(y1 - y2)
-
-
 def reconstructPath(path):
     for node in path:
         node.makePath()
@@ -53,7 +47,7 @@ def astar(start, end, nodes, openSet, closedSet):
                     tempNode.makeOpen()
 
             if newPath:
-                tempNode.h = heuristic((tempCol, tempRow), end.pos)
+                tempNode.h = tempNode.heuristic(end)
                 tempNode.f = tempNode.g + tempNode.h
                 tempNode.previous = current
 
