@@ -8,6 +8,7 @@ import sys
 
 from Classes.Node import Node
 from Classes.Button import Button
+from Classes.Slider import Slider
 from MazeGen.RecursiveMaze import *
 from Pathfinder.Dijkstra import dijkstra
 from Pathfinder.astar import astar
@@ -205,6 +206,8 @@ def redrawGameWindow(dropDownButtons=[]):
     for dropDown in dropDownButtons:
         dropDown.draw()
 
+    speedSlider.draw(WIN)
+
     # Choose maze generation algorithm
     # Run maze generation button
     # Stop maze generation button
@@ -221,7 +224,7 @@ def redrawGameWindow(dropDownButtons=[]):
 ##########################
 
 def main():
-    global nodes, buttons
+    global nodes, buttons, speedSlider
     pygame.display.set_caption("Pathfining Algorithm Visualizer")
 
     nodes = createNodes()
@@ -229,6 +232,8 @@ def main():
     end = False
     startNode = None
     endNode = None
+
+    pathfinderRunning = ""
 
     do_astar = False
     openSet = []
@@ -248,57 +253,70 @@ def main():
 
     buttons = generateButtons()
 
+    speedSlider = Slider((GRIDWIDTH + GRIDX + 25, 250), SIDEBAR - 55, "Speed", 0, 60)
+    speed = 30
+
     midrun = False
     pathfinderDropDown = generateDropDownPathfinder()
     mazeDropDown = generateDropDownMaze()
     while True:
-        CLOCK.tick(60)
+        CLOCK.tick(speed)
 
         for event in pygame.event.get():  # checking for events
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
             if pygame.mouse.get_pressed()[0]:
+                speed = speedSlider.circle.updateSpeed(speedSlider.startX, speedSlider.endX)
                 pos = pygame.mouse.get_pos()
                 col = int((pos[0] - GRIDX) // CELLSIZEX)
                 row = int((pos[1] - GRIDY) // CELLSIZEY)
-                if 0 <= row < GRIDSIZEY and 0 <= col < GRIDSIZEX:
-                    currNode = nodes[row][col]
-                    if not(start) and not(currNode.isEnd()):
-                        currNode.makeStart()
-                        currNode.distance = 0
-                        startNode = currNode
-                        start = True
-                    elif not(end) and not(currNode.isStart()):
-                        currNode.makeEnd()
-                        endNode = currNode
-                        end = True
-                    elif not(currNode.isEnd()) and not(currNode.isStart()):
-                        currNode.makeBarrier()
+                if not(midrun):
+                    if 0 <= row < GRIDSIZEY and 0 <= col < GRIDSIZEX:
+                        currNode = nodes[row][col]
+                        if not(start) and not(currNode.isEnd()):
+                            currNode.makeStart()
+                            currNode.distance = 0
+                            startNode = currNode
+                            start = True
+                        elif not(end) and not(currNode.isStart()):
+                            currNode.makeEnd()
+                            endNode = currNode
+                            end = True
+                        elif not(currNode.isEnd()) and not(currNode.isStart()):
+                            currNode.makeBarrier()
+
+                if speedSlider.circle.isPressed(pos[0], pos[1]):
+                    speedSlider.circle.update(speedSlider.startX, speedSlider.endX, pos[0])
 
                 for button in buttons:
                     if button.isPressed(pos[0], pos[1]):
                         button.pressed = True
-                        if button.name == "Run Button" and button.pressed:
+                        if button.name == "Run Button" and button.pressed and not(midrun):
                             if start and end:
                                 if buttons[0].text == "A* Algorithm":
                                     do_astar = True
                                     openSet.append(startNode)
+                                    pathfinderRunning = "astar"
                                 elif buttons[0].text == "Dijkstra's Algorithm":
                                     do_dijkstra = True
                                     unexplored = [nodes[row][col] for row in range(len(nodes)) for col in range(len(nodes[row]))]
+                                    pathfinderRunning = "dijkstra"
                                 elif buttons[0].text == "Breadth-First Search":
                                     do_bfs = True
                                     startNode.discovered = True
                                     queue.append(startNode)
+                                    pathfinderRunning = "bfs"
                                 elif buttons[0].text == "Depth-First Search":
                                     do_dfs = True
                                     startNode.visited = True
                                     stack.append(startNode)
+                                    pathfinderRunning = "dfs"
                                 elif buttons[0].text == "Greedy Algorithm":
                                     do_greedy = True
                                     startNode.distance = startNode.heuristic(endNode)
                                     nodesToVisit.append(startNode)
+                                    pathfinderRunning = "greedy"
                                 else:
                                     button.pressed = False
                             else:
@@ -335,18 +353,40 @@ def main():
                                 button.pressed = False
                         if button.name == "Stop Button":
                             if buttons[3].pressed:
-                                buttons[5].show = True
-                                if do_astar:
-                                    do_astar = False
+                                if midrun:
+                                    buttons[5].show = True
+                                    if do_astar:
+                                        do_astar = False
+                                    elif do_dijkstra:
+                                        do_dijkstra = False
+                                    elif do_bfs:
+                                        do_bfs = False
+                                    elif do_dfs:
+                                        do_dfs = False
+                                    elif do_greedy:
+                                        do_greedy = False
+
                                     button.pressed = False
-                                    pathfinderRunning = "astar"
+                                    buttons[3].pressed = False
+
                             else:
                                 button.pressed = False
                         if button.name == "Resume Button":
-                            if midrun and pathfinderRunning == "astar":
-                                do_astar = True
-                                button.show = False
-                                button.pressed = False
+                            if midrun:
+                                if pathfinderRunning == "astar":
+                                    do_astar = True
+                                elif pathfinderRunning == "dijkstra":
+                                    do_dijkstra = True
+                                elif pathfinderRunning == "bfs":
+                                    do_bfs = True
+                                elif pathfinderRunning == "dfs":
+                                    do_dfs = True
+                                elif pathfinderRunning == "greedy":
+                                    do_greedy = True
+                                buttons[3].pressed = True
+
+                            button.show = False
+                            button.pressed = False
                         if button.name == "Choose Pathfinder Button":
                             if not(midrun):
                                 button.text = "Choose Pathfinder"
@@ -362,6 +402,7 @@ def main():
                                 button.pressed = False
 
             if pygame.mouse.get_pressed()[2]:
+                speed = speedSlider.circle.updateSpeed(speedSlider.startX, speedSlider.endX)
                 pos2 = pygame.mouse.get_pos()
                 col2 = int((pos2[0] - GRIDX) // CELLSIZEX)
                 row2 = int((pos2[1] - GRIDY) // CELLSIZEY)
