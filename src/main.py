@@ -9,7 +9,6 @@ import sys
 from Classes.Node import Node
 from Classes.Button import Button
 from Classes.Slider import Slider
-from MazeGen.RecursiveMaze import *
 from Pathfinder.Dijkstra import dijkstra
 from Pathfinder.astar import astar
 from Pathfinder.BFS import bfs
@@ -125,7 +124,6 @@ def drawBackground():
 def generateButtons():
     buttons = []
     buttons.append(Button("Choose Pathfinder Button", 100, 10, 270, 80, "Choose Pathfinder", 40, WIN))
-    buttons.append(Button("Choose Maze Generator Button", 400, 10, 270, 80, "Choose Maze Generator", 30, WIN))
     buttons.append(Button("Reset Button", 1170, 10, 100, 35, "Reset", 25, WIN))
     buttons.append(Button("Run Button", 1290, 10, 100, 35, "Run", 25, WIN))
     buttons.append(Button("Stop Button", 1290, 55, 100, 35, "Stop", 25, WIN))
@@ -140,11 +138,6 @@ def generateDropDownPathfinder():
     dropDown.append(Button("Breadth-First Search Button", 100, 250, 270, 80, "Breadth-First Search", 35, WIN, False))
     dropDown.append(Button("Depth-First Search BUtton", 100, 330, 270, 80, "Depth-First Search", 38, WIN, False))
     dropDown.append(Button("Greedy Algorithm Button", 100, 410, 270, 80, "Greedy Algorithm", 38, WIN, False))
-    return dropDown
-
-
-def generateDropDownMaze():
-    dropDown = []
     return dropDown
 
 
@@ -208,14 +201,7 @@ def redrawGameWindow(dropDownButtons=[]):
 
     speedSlider.draw(WIN)
 
-    # Choose maze generation algorithm
-    # Run maze generation button
-    # Stop maze generation button
-
     # Select Grid Size (rows and cols)
-    # Select speed of algorithm  (frame rate)
-
-    # Draw the information about the different colors
 
     pygame.display.update()
 
@@ -258,7 +244,6 @@ def main():
 
     midrun = False
     pathfinderDropDown = generateDropDownPathfinder()
-    mazeDropDown = generateDropDownMaze()
     while True:
         CLOCK.tick(speed)
 
@@ -392,12 +377,6 @@ def main():
                                 button.text = "Choose Pathfinder"
                                 dropDownMode(pathfinderDropDown)
                                 buttons[0].pressed = False
-                            else:
-                                button.pressed = False
-                        if button.name == "Choose Maze Generator Button":
-                            if not(midrun):
-                                dropDownMode(mazeDropDown)
-                                buttons[1].pressed = False
                             else:
                                 button.pressed = False
 

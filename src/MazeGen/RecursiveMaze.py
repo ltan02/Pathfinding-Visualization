@@ -1,2 +1,0 @@
-def recursiveMazeGenerator(currentNode):
-    pass
