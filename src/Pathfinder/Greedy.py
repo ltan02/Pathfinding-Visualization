@@ -9,7 +9,7 @@ def greedy(end, nodes, nodesToVisit):
         if nodesToVisit[i].distance < nodesToVisit[winner].distance:
             winner = i
 
-    current = nodesToVisit.pop(i)
+    current = nodesToVisit.pop(winner)
     current.visited = True
     if not(current.isStart()) and not(current.isEnd()):
         current.makeOpen()
@@ -29,13 +29,13 @@ def greedy(end, nodes, nodesToVisit):
         tempCol = neighbour[0]
         tempRow = neighbour[1]
         tempNode = nodes[tempRow][tempCol]
-        if not (tempNode.isStart()) and not (tempNode.isEnd()):
-            tempNode.makeOpen()
+        if not (current.isStart()) and not (current.isEnd()):
+            current.makeClosed()
         if not(tempNode.isBarrier()) and not(tempNode.visited):
-            current.distance = current.heuristic(end)
+            tempNode.distance = tempNode.heuristic(end)
             tempNode.parent = current
-            if not (current.isStart()) and not (current.isEnd()):
-                current.makeClosed()
+            if not (tempNode.isStart()) and not (tempNode.isEnd()):
+                tempNode.makeOpen()
             nodesToVisit.append(tempNode)
 
     return nodesToVisit
