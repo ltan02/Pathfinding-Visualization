@@ -201,8 +201,6 @@ def redrawGameWindow(dropDownButtons=[]):
 
     speedSlider.draw(WIN)
 
-    # Select Grid Size (rows and cols)
-
     pygame.display.update()
 
 ##########################
@@ -240,7 +238,7 @@ def main():
     buttons = generateButtons()
 
     speedSlider = Slider((GRIDWIDTH + GRIDX + 25, 250), SIDEBAR - 55, "Speed", 0, 60)
-    speed = 30
+    speed = speedSlider.circle.updateSpeed(speedSlider.startX, speedSlider.endX)
 
     midrun = False
     pathfinderDropDown = generateDropDownPathfinder()
@@ -326,20 +324,22 @@ def main():
                             do_bfs = False
                             queue = []
 
+                            do_dfs = False
+
+                            do_greedy = False
+
                             pathfinderRunning = ""
 
-                            buttons[5].show = False
+                            buttons[4].show = False
                             buttons[0].text = "Choose Pathfinder"
                             buttons[0].textSize = 40
-                            buttons[1].text = "Choose Maze Generator"
-                            buttons[1].textSize = 30
 
                             for button in buttons:
                                 button.pressed = False
                         if button.name == "Stop Button":
-                            if buttons[3].pressed:
+                            if buttons[2].pressed:
                                 if midrun:
-                                    buttons[5].show = True
+                                    buttons[4].show = True
                                     if do_astar:
                                         do_astar = False
                                     elif do_dijkstra:
@@ -352,7 +352,7 @@ def main():
                                         do_greedy = False
 
                                     button.pressed = False
-                                    buttons[3].pressed = False
+                                    buttons[2].pressed = False
 
                             else:
                                 button.pressed = False
@@ -368,11 +368,11 @@ def main():
                                     do_dfs = True
                                 elif pathfinderRunning == "greedy":
                                     do_greedy = True
-                                buttons[3].pressed = True
+                                buttons[2].pressed = True
 
                             button.show = False
                             button.pressed = False
-                        if button.name == "Choose Pathfinder Button":
+                        if button.name == "Choose Pathfinder Button": #Make it so you can choose a new pathfinder without resetting the board
                             if not(midrun):
                                 button.text = "Choose Pathfinder"
                                 dropDownMode(pathfinderDropDown)
@@ -414,7 +414,7 @@ def main():
                 print("No solution found")
                 do_astar = False
                 midrun = False
-                buttons[3].pressed = False
+                buttons[2].pressed = False
         elif do_dijkstra:
             if len(unexplored) > 0:
                 loop = dijkstra(endNode, nodes, unexplored)
@@ -425,12 +425,12 @@ def main():
                 else:
                     do_dijkstra = False
                     midrun = False
-                    buttons[3].pressed = False
+                    buttons[2].pressed = False
             else:
                 print("No solution found")
                 do_dijkstra = False
                 midrun = False
-                buttons[3].pressed = False
+                buttons[2].pressed = False
         elif do_bfs:
             if len(queue) > 0:
                 loop = bfs(endNode, nodes, queue)
@@ -441,12 +441,12 @@ def main():
                 else:
                     do_bfs = False
                     midrun = False
-                    buttons[3].pressed = False
+                    buttons[2].pressed = False
             else:
                 print("No solution found")
                 do_bfs = False
                 midrun = False
-                buttons[3].pressed = False
+                buttons[2].pressed = False
         elif do_dfs:
             if len(stack) > 0:
                 loop = dfs(endNode, nodes, stack)
@@ -457,12 +457,12 @@ def main():
                 else:
                     do_dfs = False
                     midrun = False
-                    buttons[3].pressed = False
+                    buttons[2].pressed = False
             else:
                 print("No solution found")
                 do_dfs = False
                 midrun = False
-                buttons[3].pressed = False
+                buttons[2].pressed = False
         elif do_greedy:
             if len(nodesToVisit) > 0:
                 loop = greedy(endNode, nodes, nodesToVisit)
@@ -473,12 +473,12 @@ def main():
                 else:
                     do_greedy = False
                     midrun = False
-                    buttons[3].pressed = False
+                    buttons[2].pressed = False
             else:
                 print("No solution found")
                 do_greedy = False
                 midrun = False
-                buttons[3].pressed = False
+                buttons[2].pressed = False
 
         redrawGameWindow()
 
